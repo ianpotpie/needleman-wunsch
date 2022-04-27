@@ -15,7 +15,7 @@ def needleman_wunsch(sequence1, sequence2, scoring_scheme):
     :return: a max alignment score and a list of alignments that produce that score
     """
     # initialize constants
-    gap_penalty = scoring_scheme.gap_extend_penalty
+    gap_penalty = scoring_scheme.gap_penalty
     max_i = len(sequence1) + 1
     max_j = len(sequence2) + 1
 
