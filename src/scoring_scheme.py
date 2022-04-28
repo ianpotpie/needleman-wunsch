@@ -93,3 +93,30 @@ class ScoringScheme:
                 i = self.index_by_symbol[symbol]
                 for j, val in enumerate(row):
                     self.scoring_matrix[i][j] = float(val)
+
+    def __str__(self):
+        """
+        Creates a string representation of the scoring scheme.
+        If a scoring matrix is loaded, then it uses a standard PAM or BLOSUM style matrix.
+
+        :return: a string of the scoring scheme
+        """
+        if self.scoring_matrix is None:
+            s = f"Match Score: {self.match_score}\n" + \
+                f"Mismatch Penalty: {self.mismatch_penalty}\n" + \
+                f"Gap Start Penalty: {self.gap_start_penalty}\n" + \
+                f"Gap Extension Penalty: {self.gap_penalty}"
+        else:
+            s = f"# Gap Start Penalty: {self.gap_start_penalty}\n" + \
+                f"# Gap Extension Penalty: {self.gap_penalty}\n"
+
+            symbol_list = self.get_symbols()
+            s += "   " + "  ".join(symbol_list)
+            for i in range(self.scoring_matrix.shape[0]):
+                s += "\n" + symbol_list[i]
+                for j in range(self.scoring_matrix.shape[1]):
+                    score = self.scoring_matrix[i, j]
+                    score = int(score) if score.is_integer() else score
+                    s += f" {score}" if score < 0.0 else f"  {score}"
+
+        return s
