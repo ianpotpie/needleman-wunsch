@@ -39,9 +39,9 @@ def needleman_wunsch(sequence1, sequence2, scoring_scheme):
         next_partials = []
         for alignment1, alignment2, i, j in partials:
             if i == 0:
-                alignments.append((alignment1, (j * "-") + alignment2))
+                alignments.append(((j * "-") + alignment1, sequence2[:j] + alignment2))
             elif j == 0:
-                alignments.append(((i * "-") + alignment1, alignment2))
+                alignments.append((sequence1[:i] + alignment1, (i * "-") + alignment2))
             else:
                 if A[i, j] == A[i - 1, j - 1] + scoring_scheme(sequence1[i - 1], sequence2[j - 1]):
                     next_partials.append((sequence1[i - 1] + alignment1, sequence2[j - 1] + alignment2, i - 1, j - 1))
@@ -83,14 +83,18 @@ def main():
 
     max_score, alignments = needleman_wunsch(sequence1, sequence2, scoring_scheme)
 
+    print("Needleman-Wunsch Global Alignment")
+    print(33 * "-")
     print(f"Sequence 1: {sequence1}")
     print(f"Sequence 2: {sequence2}")
-    print(f"Alignment Score: {max_score}")
-    print(30 * "-")
+    print(f"Optimal Alignment Score: {max_score}")
+    print()
+    print("Optimal Alignments:")
+    print(33 * "-")
     for i, alignment in enumerate(alignments):
         print(alignment[0])
         print(alignment[1])
-        print(30 * "-")
+        print(33 * "-")
 
 
 if __name__ == "__main__":
