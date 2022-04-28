@@ -7,7 +7,7 @@ class ScoringScheme:
         self.mismatch_penalty = mismatch_penalty
         self.gap_penalty = gap_penalty
         self.gap_start_penalty = gap_start_penalty
-        self.index_by_symbol = None
+        self.symbol_to_index = None
         self.scoring_matrix = None
 
     def get_symbols(self):
@@ -20,8 +20,8 @@ class ScoringScheme:
         if self.scoring_matrix is None:
             return None
         else:
-            symbols = np.empty(len(self.index_by_symbol), dtype=str)
-            for symbol, index in self.index_by_symbol.items():
+            symbols = np.empty(len(self.symbol_to_index), dtype=str)
+            for symbol, index in self.symbol_to_index.items():
                 symbols[index] = symbol
             return list(symbols)
 
@@ -50,10 +50,10 @@ class ScoringScheme:
                 score += self.gap_start_penalty if (i > 0) and sequence2[i - 1] != "-" else 0.0
 
             elif self.scoring_matrix is not None:
-                assert symbol1 in self.index_by_symbol, "Encountered symbol not in the current scoring matrix"
-                assert symbol2 in self.index_by_symbol, "Encountered symbol not in the current scoring matrix"
-                row = self.index_by_symbol[symbol1]
-                col = self.index_by_symbol[symbol2]
+                assert symbol1 in self.symbol_to_index, "Encountered symbol not in the current scoring matrix"
+                assert symbol2 in self.symbol_to_index, "Encountered symbol not in the current scoring matrix"
+                row = self.symbol_to_index[symbol1]
+                col = self.symbol_to_index[symbol2]
                 score += self.scoring_matrix[row][col]
             else:
                 score += self.match_score if symbol1 == symbol2 else self.mismatch_penalty
@@ -82,17 +82,17 @@ class ScoringScheme:
             headline = f.readline()
             while headline[0] == "#":  # iterates past all lines with comments
                 headline = f.readline()
-            self.index_by_symbol = {symbol.strip(): i for i, symbol in enumerate(headline.split())}
+            self.symbol_to_index = {symbol.strip(): i for i, symbol in enumerate(headline.split())}
 
             # fill the scoring matrix
-            n_symbols = len(self.index_by_symbol)
+            n_symbols = len(self.symbol_to_index)
             self.scoring_matrix = np.zeros((n_symbols, n_symbols))
             for line in f:
                 row = line.split()
                 symbol = row.pop(0)
-                i = self.index_by_symbol[symbol]
-                for j, val in enumerate(row):
-                    self.scoring_matrix[i][j] = float(val)
+                i = self.symbol_to_index[symbol]
+                for j, score in enumerate(row):
+                    self.scoring_matrix[i, j] = float(score)
 
     def __str__(self):
         """
@@ -110,10 +110,10 @@ class ScoringScheme:
             s = f"# Gap Start Penalty: {self.gap_start_penalty}\n" + \
                 f"# Gap Extension Penalty: {self.gap_penalty}\n"
 
-            symbol_list = self.get_symbols()
-            s += "   " + "  ".join(symbol_list)
+            symbols = self.get_symbols()
+            s += "   " + "  ".join(symbols)
             for i in range(self.scoring_matrix.shape[0]):
-                s += "\n" + symbol_list[i]
+                s += "\n" + symbols[i]
                 for j in range(self.scoring_matrix.shape[1]):
                     score = self.scoring_matrix[i, j]
                     score = int(score) if score.is_integer() else score
